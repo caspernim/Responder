@@ -1,0 +1,466 @@
+---
+title: "Changes in pressure pain threshold following spinal manipulation is determined by segmental application and clinical improvement"
+subtitle: "WORKING TITLE - NEEDS TO BE AMAZING"
+author: "Casper Glissmann Nim, Gregory Neil Kawchuk, Berit Schiøttz-Christensen & Søren O'Neill"
+date: "September, 2019"
+output:
+  word_document: default
+  pdf_document: default
+csl: nature.csl
+bibliography: responder.bib
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+```{r include=FALSE}
+#source relevant data
+source("/home/nim/Desktop/Datamanagment/Analysis/Setup.R")
+source("/home/nim/Desktop/Datamanagment/Analysis/Responderanal_vol3.R")
+source("/home/nim/Desktop/Datamanagment/Analysis/responder_seg_gs.R")
+source("/home/nim/Desktop/Datamanagment/Analysis/responder_seg_ppt.R")
+source("/home/nim/Desktop/Datamanagment/Analysis/responder_seg_hpt.R")
+```
+
+```{r include=FALSE}
+#figs and tables
+## Tables
+tdemo<-1
+tem<-2
+tanova<-3
+
+##Figures
+f.lmer.ppt<-1
+f.lmer.hpt<-2
+f.lmer.gs<-3
+f.seg<-4
+fCPRA<-5
+f.smt<-6
+## Flowchart
+## LMER figures
+```
+
+```{r Responder, include=FALSE}
+
+resp.total<-df.wide %>% select(SID,ResponderODI.fol,Treatment) %>% filter(ResponderODI.fol==TRUE) %>% count(ResponderODI.fol) %>% pull(n)
+
+nonresp.total<-df.wide %>% select(SID,ResponderODI.fol,Treatment) %>% filter(ResponderODI.fol==FALSE) %>% count(ResponderODI.fol) %>% pull(n)
+
+resp.pain <- df.wide %>% select(SID,ResponderODI.fol,Treatment) %>% filter(ResponderODI.fol==TRUE,Treatment=="Pain.segment") %>% count(ResponderODI.fol)%>% pull(n)
+
+nonresp.pain <- df.wide %>% select(SID,ResponderODI.fol,Treatment) %>% filter(ResponderODI.fol==FALSE,Treatment=="Pain.segment") %>% count(ResponderODI.fol)%>% pull(n)
+
+resp.total.nrs<-df.wide %>% select(SID,ResponderNRS.fol,Treatment) %>% filter(ResponderNRS.fol==TRUE) %>% count(ResponderNRS.fol) %>% pull(n)
+
+tricho<-df.exp.treat %>%  
+  select(SID,ODI.imp) %>% 
+  distinct() %>% 
+  count(ODI.imp)
+
+unchanged<-tricho %>%filter(ODI.imp=="No diff") %>% pull(n)
+worse<-tricho %>% filter(ODI.imp=="Worse") %>% pull(n)
+```
+
+\newpage 
+
+# Cover letter 
+
+- 
+
+## Complete manuscript title
+
+- 
+
+## Corresponding author
+
+*Casper Glissmann Nim*
+
+MSc (Clinical Biomechanics), PhD student, Chiropractor
+
+* Spinecentre of Southern Denmark, University Hospital Lillebaelt, Denmark
+
+  * Address: Middelfart, Østrehougvej 55, 5500 Middelfart, Denmark
+  
+* Department of Regional Health Research, University of Southern Denmark, Denmark
+
+  * Address: Campusvej 55, 5230 Odense M, Denmark
+
+Contact information: casper.nim@rsyd.dk
+
+## Availability of data
+
+All data generated or analyzed during this study are included as independent R and .csv files
+
+## Letter
+
+To the Editorial board at _Scientific Reports_
+
+-
+
+On behalf of the research team
+
+Casper Glissmann Nim 
+
+\newpage
+
+# Authors
+
+Casper Glissmann Nim, MSc (Clinical Biomechanics) (affiliation 1,2)
+
+Gregory Neill Kawchuk, PhD (affiliation 3)
+
+Berit Schiøttz-Christensen, PhD (affiliation 1,2)
+
+Søren O'Neill, PhD (affiliation 1,2)
+
+1: Spinecentre of Southern Denmark, University Hospital Lillbaelt, Denmark
+  * Address: Middelfart, Østrehougvej 55, 5500 Middelfart, Denmark
+  
+2: Department of Regional Health Research, University of Southern Denmark, Denmark
+  * Address: Campusvej 55, 5230 Odense M, Denmark
+  
+3: Department of Physical Therapy, University of Alberta, Canada
+  * Adress: 8205 114St, 2-50 Corbett Hall, T6G 2G4  Edmonton, Alberta, Canada
+
+## Author contributions statement
+
+CGN: Collected data, completed the data analysis
+
+CGN, SON: wrote the initial draft of the manuscript.
+
+All authors contributed to the design, interpretation of the data and approved the submitted manuscript.
+
+# Competing interests
+
+The authors declare no competing interests.
+
+# Acknowledgments
+
+The project is funded by The Danish Chiropractic Fund for Research and  Post Graduate Research, Hospital Lillebaelt, and The Danish Rheumatism Association. We would like to thank all the participants who participated in the study. 
+
+\newpage
+
+# Abstract
+
+-
+
+\newpage
+
+# Introduction
+
+## Spinal manipulative therapy
+
+Clinical guidelines recommend spinal manipulative therapy (SMT) as a first-line or adjunct therapy for non-specific low back pain (LBP) [@oliveira_clinical_2018], and the effect it has on pain and disability in chronic LBP is comparable to that of other recommended therapies [@rubinstein_benefits_2019]. Spinal manipulative therapy consists of a controlled mechanical thrust of high-velocity and low-amplitude delivered to a specific anatomical location on a specific segment [@bergmann_chiropractic_2010]. 
+
+## Effect
+
+It is unclear to what extent it is possible to be specific when applying SMT to a given segment. Several studies indicate that the effects of SMT on pain and range of motion does not differ when directing SMT at a specific or random segment [@donaldson_prescriptively_2016; @chiradejnant_efficacy_2003], whether the thrust is segment specific or general [@mccarthy_comparing_2019; @sutlive_comparison_2009; @slaven_relative_2013], and what region is treated [@de_oliveira_immediate_2013]. By contrast, there appears to be significant post-treatment differences in biomechanical parameters in between those who respond to SMT and those who do not. These include in-vivo testing of bulk stiffness, lumbar multifidus control [@wong_participants_2015; @fritz_preliminary_2011], disc-diffusion [@wong_participants_2015; @thiry_short-term_2018], the flexion-relaxation phenomenon [@xia_association_2017] and changes in EMG activity [@herzog_electromyographic_1999]. It is possible, that the effects of SMT are related to such general biomechanical effects, but not strongly associated with segmental changes.
+
+Another potential explanation for clinical pain relief that is not directly related to segmental biomechanics, is a centrally mediated neurophysiological effects on pain sensitivity. Such effects have been examined thoroughly using quantitative sensory pain testing [@graven-nielsen_assessment_2010] both segmentally, regionally and globally in a range of different setups with one to multiple sessions, different manual techniques, different outcome measures and different test populations [@honore_regional_2018; @millan_effect_2012; @aspinall_manipulation-induced_2019; @coronado_changes_2012]. It remains unclear however, to what extent SMT effects pain relief through central nociceptive modulation. This is partly due to methodological limitations in providing an efficient and comparable sham intervention to SMT [@puhl_quality_2017].  
+
+### RCT study 
+
+We recently published a randomized clinical trial (RCT) that compared four sessions of SMT specifically aimed at segments characterized by either high stiffness or low pressure pain threshold (PPT) in a group of patients with persistent non-specific low back pain (LBP). No difference was observed in clinical pain relief or mechanical stiffness post-SMT between groups, but a significant group difference emerged in PPT. The PPT increased significantly in the group which received SMT at segments characterized by high pain sensitivity compared to the group treated at segments characterized by high stiffness. We concluded that the observed effect on PPT was most likely mediated by a segment specific neurological reflex as opposed to a curative effect, as the PPT change did not indicate clinical improvement. Thus, providing some new evidence for a segment specific effect of SMT, but it is entirely possible of course, that other factors determined the clinical effects of SMT.
+
+### Objective
+Our previous study did not investigate the potential impact of being a clinical responder or non-responder within the allocated subgroups. The present study is a secondary analysis focused on re-analyzing data from the randomized trial (REF RCT) including data on clinical response to SMT. Participants with persistent non-specific low back pain were treated with spinal manipulative therapy at either a lumbar segment characterized by stiffness or pain sensitivity. Changes in i) pressure pain threshold, ii) heat pain threshold and iii) global stiffness is re-analyzed taken responder status into account as an interaction term. Finally, the outcome changes are investigated considering the relationship between the application site and the remaining segments.  
+
+# Method
+## Design
+This secondary explorative analysis re-analyzed data from a randomized clinical trial (Clinical.Trial.gov identifier: NCT04086667 11/09/19) [REF RCT]. A cohort of non-surgical persistent LBP patients were treated with SMT at a lumbar segment characterized by either i) stiffness or ii) pain sensitivity, to determine whether this affected subjective pain intensity as well as spinal stiffness and pain sensitivity. To examine whether such objective changes in stiffness and pain sensitivity are contingent upon clinical improvement, patients were dichotomized into clinical responders and non-responders in relation a to changes in the Oswestry disability index (ODI).
+
+## Participants
+We included 132 participants from a secondary care Spinecenter, seven patients dropped out without completing the intervention and a further two were lost to follow-up, leaving 123 participants available for the analysis.
+Inclusion criteria were:
+
+* LBP > 3 months
+* LBP of benign or degenerative origin e.g. no inflammatory or malignant underlying cause
+* No surgical indication or previous spinal surgery
+* No history of SMT in the preceding 4 weeks
+* Daily opioid intake, was limited to 40 mg of morphine at the time of inclusion 
+
+<!--- nej men de blev spurgt ved baseline ---> 
+
+* BMI < 35
+* Age 18-60
+
+Exclusion criteria were:
+
+* Failure to complete 75% of the allocated SMT intervention
+* Recipient of manual therapy (lower back) in another, none project setting during the study period 
+* Changes in pain medication during the study
+
+No patients were excluded after initiating the project on the basis of the criteria.   
+
+All participants gave oral and written informed consent for the study, approved by the regional research ethics board (S-20160201). 
+
+## Procedure
+
+All demographic data were collected using the comprehensive SpineData questionnaire, a clinical registry in use at The Spinecenter of Southern Denmark [@kent_spinedata_2015]. 
+
+Upon inclusion, the initial test session consisted of segmental identification for the experimental procedure: In the prone position, the height of iliac crest was determined by palpation as an indicator of the interspineous space between L4 and L5.All the spine processes fra S1 to L1 were marked superficially by a permanent marker pen and subsequently confirmed using ultrasonography (Sonosite Titan Linear, L38 probe). 
+
+Pressure pain threshold, heat pain threshold  (HPT) and spinal stiffness were measured 
+for each segment in a predetermined order. The relatively stiffest and most pain sensitive segments were identified as described in the previous publication (REF RCT).
+The participants were randomly allocated from a pre-compiled, computer-generated randomization list to receive SMT at stiffest or most pain sensitive segment. The aforementioned superficial markings were used to direct treatment at the specific segment. Immediately following the first SMT treatment, stiffness was re-measured. Session 2 and 3 consisted of SMT at the allocated segment only, with no experimental data collection. Following the fourth and final treatment, the experimental procedure (pain sensitivity and stiffness) was repeated in full. A follow-up session with the full laboratory test protocol was scheduled approximately 14 days afterwards, and the participant did not receive any SMT during this period. Subjective back pain and ODI was measured at each visit to the laboratory.
+
+## Quantitative sensory testing
+The QST battery consisted of localized PPT and HPT for each lumbar segment, all tests were performed with the participant in the prone position using the segmental marks. All tests were completed in a predetermined randomized order (computer generated randomization list). All 5 segments were tested three times with an interval of approximately 10 second between each test. 
+
+PPT was measured using a pressure algometer (model 2, Somedic, Hørby, Sweden). Attached to the probe was a custom, 3D printed double-headed probe (2x1cm²2, 3 cms apart), which allowed for a bilateral pressure to be applied either side of the midline. The rate of increase in pressure was kept at a near constant 50 kPa/s (indicator on the algometer). Before data collection, a trial procedure consisting of 1-2 tests were completed on the lower extremity and Th12 to familiarize the participant with the procedure. Each lumbar segment was measured three times. If no pain has been elicited by 1000 kPa, this was recorded as the PPT. If the first and second measurements were 1000 kPa, a third would not be performed. PPT has previously been shown to have excellent intra-rater reliability in a LBP population [@paungmali_intrarater_2012].
+
+HPT was measured directly after PPT, also at each spinal process from L1 to L5 in the same fashion as PPT, but using a single probe in the midline. HPT was measured with a Medoc TSA-II thermode stimulator using a 30x30 mm head. The average of 3 measurement for each level was used. The thermode baseline temperature was pre-set to 32 degrees Celsius, and increased by 1 Celsius per second until the participants indicated that the stimulation was perceived as painful by pressing an indicator button, after which the temperature returned to baseline (decrease of 10 C/second). A 10 seconds interval between each stimuli was observed. HPT measured at the spine and in the L5-dermatome, had good to excellent intra-rater reliability in a healthy population [@knutti_testretest_2014]
+
+## VerteTrack
+Stiffness was measured using the custom manufactured research tool VerteTrack (VT). The apparatus consists of a pair of rollers either side of the midline, loaded by a fixed weight which moves along the lumbar spine. The movement was controlled in two axes (superior/inferior and medial/lateral) by computer controlled stepper motors, thus reliably tracking an individually pre-determined path along the spine. Displacement in the third axis (anterior/posterior) was measured continuously during movement by a string potentiometer (TE Connectivity, USA). The VT thus generated a series of vertical displacement data for a given fixed weight, in relation to longitudinal and transverse position. Repeated VT measurements were performed with increasing weights, up to 6 kilograms in steps of  1 kg. The VT has been demonstrated to produce reliable measurements for within and between-sessions in an asymptomatic population [@hadizadeh_reliability_2019].
+
+## Randomization
+The complete details of the randomization is described in the original paper [RCT REF]. In short, segmental stiffness was determined using the raw force-displacement from the VTs last load and segmental pain sensitivity was the mean value of the three PPT measures. A ratio between these 2 score was calculated where each segment was scored between -1 to +1. Approximating -1 would indicate a stiff segment and +1 a pain sensitive segment. The participants were randomized between the _stiff group_ and the _pain group_ depending on the segmental ratio and allocation. The participant, assessor and chiropractor were all blinded in this process.  
+
+## SMT
+Participants received standardized SMT a total of four times during a two-week span. The SMT consisted of a side-lying posterior to anterior low amplitude, high velocity thrust with contact at the spine process of the indicated segment. The SMT application was done by one of two chiropractors each with more than 12 years of experience.  
+
+## Variables of interest
+
+### Clinical measures
+
+Disability: (continuous data) was assessed using the ODI (version 2.1), which in the Danish translation has been shown to be a reliable instrument for measuring LBP outcome [@lauridsen_danish_2006]. A frequency sum score (0-100) was calculated and participants were dichotomized into a responder or non-responder depending on a minimum 30% reduction in ODI at follow-up [@ostelo_interpreting_2008].
+
+Subjective low back pain: (continuous data) a mean score (0-10) from the self subjective LBP rating scale [@manniche_low_1994]. This contained: Current LBP, worst and average LBP in the last 14 days. 
+
+Psychological profile: (continuous data) The profile consisted of 9 questions with answer options on an 11-point rating scale. A validation study reported that the screening tool is comparable to the original full items questionnaires [@kent_concurrent_2014]. A composition score using the mean score for each measure was divided by 6 (total number of domains) for a total sum score of psychological distress (0-10). The domains were related to depression, fear avoidance, pain catastrophizing, anxiety, isolation and risk for persistent pain.
+
+Expectation for pain relief: (Categorical data) a 5-point Likert scale, anchored with _high agree_ to _highly disagree_ - this was categorised as i) positive expectation (highly agree and agree), ii) negative expectation (highly disagree and disagree) and iii) no expectation (neither)). 
+
+Age: Continuous data
+
+Sex: Binary data
+
+Duration of the current episode of LBP: Continuous data
+
+Progress: Categorical data - _Improved_, _Unchanged_, _Worse_ - this was further dichotomized into i)improved and ii)unchanged/worse).
+
+The outcome measures were: PPT, HPT and GS
+
+### Experimental measures
+
+Pressure pain threshold: (continuous data) the raw PPT score (kPa), from each of the 3 trials was averaged for each segment, and a mean sum score for all segments was applied for the analysis
+
+Heat pain threshold: (continuous data) the raw degree celsius score, from each of the 3 trials was averaged for each segment, and a mean sum score for all segments was applied for the analysis
+
+Global stiffness: (continuous data) the average slope of the force-displacement curve from the preload (~7 Newton) to the maximum load tolerated was measured for each level, and a mean sum score for all segments was applied for the analysis.
+
+#### Segmental measures
+Pressure pain threshold, HPT and GS are examined for each segment by categorizing the segments into three groups: i) the treated segment e.g _L3_, ii) the adjacent segment(s) e.g. _L2_ and _L4_, and iii) all other segments e.g. _L1_ and _L5_.  
+
+## Statistical analysis
+### Descriptive data
+Descriptive data is reported as means with standard deviation or median and interquartile ranges dependening on data distribution. Frequency is reported for categorical data. Uni-variate group comparisons for baseline variables were done by independent non-paired tests (t-test or Wilcoxon rank sum test) depending on data distribution and variable type for independent candidate variables, afterwards these values were adjusted using bonferroni correction. A multivariate logsitic regression with responder as the dependent variable was further calculated. Responder status were dichotomized as binary (TRUE/FALSE). The relationship between allocation group and responder status was tested with Fishers exact test. 
+
+### Exploratory segmental data
+A subjective and exploratory analysis is obligatory before extracting data from the VT. A visual inspection of the sagittal curvature was performed this included the linearity. The markings were compared for each trial and resulted in approximately 11% of the data being removed due to non-overlap or technical errors such as muscle guarding or breathing. The same markings were used for all the experimental measures while data also was omitted for PPT and HPT. This process is described in full detail elsewhere [RCT REF]. 
+
+### Time analysis
+A three-way mixed model with subject as a random intercept and allocation group, time and responder status as interacting fixed effects was undertaken in order to determine within- and between-group changes. The analysis was completed for all experimental outcome measures. 
+
+As this was an experimental analysis no baseline variables were adjusted for. The models are illustrated visually with means, standard errors as error bars and a significance value (if p<0.05). The few missing values due to non-overlap were not omitted as mixed models uses likelihood estimation methods for comparison testing. Model assumptions were tested for collinearity, homoskedasticity and normal distribution of the residuals.
+
+#### Time data
+Pressure pain threshold and HPT were measured at baseline, directly post-SMT, and at follow-up while GS also was measured immediately after the first SMT session.  
+
+#### Segmental analysis
+The segmental categorization was added as an interaction to the original three-way models for the experimental outcome measures.
+
+The mixed models are presented visually as _best-guess average effects_ and standard errors. If the significance value is less than 0.05 it will be represented on the plot. 
+
+### Cumulative Proportion of Responders Analysis
+A cumulative proportion of responders (CPRA) graph is presented to display the different numbers of responders by the proportion of change in ODI, and to visualize whether the predetermined 30% was appropriate for the analysis [@ostelo_interpreting_2008]. Further post-hoc sensitivity analysis will be presented if the CPRA deems this significant.
+
+### Sensitivity analysis
+For the present study, disability was chosen as the primary outcome measure for responder analysis to better allow comparison with existing literature [@wong_participants_2015; @xia_association_2017]. A similar mixed model analysis was performed with LBP intensity as as the outcome variable.
+
+A p-value < 0.05 was considered significant
+
+Data analysis was completed using R [@r_development_core_team_r:_2009] for Linux v. 3.6.0 with R-studio v. 1.1.456 and relevant add on packages.   
+
+# Results
+## Participants characteristics 
+Of the 123 participants who completed the intervention `r resp.total` were dichotomized as a responder while the remaining `r nonresp.total` were non-responders. There was no difference in number of responders between the randomized SMT groups (p-value = `r Rdiff`). 
+
+Table `r tdemo` presents baseline patient rapported data independent of allocated SMT group. The baseline experimental measures are presented in Table `r tem`. The psychological profile was statistical significant before the bonferroni correction. Similiarly the multivariate analysis shows a significant association between the psychological profile and responder status (`r paste0(OR[3,1],"(",OR[3,2],"-",OR[3,3],")")`. No other variables were significantly associated.
+
+## Changes in pressure pain threshold
+There were no baseline differences in the mixed model for PPT between responders and non-responders. 
+
+The PPT model demonstrated an overall increase of PPT post-SMT for the responders independent of the segmental treatment allocation. The _pain group_ had a PPT increase of `r LMER.table.odi.ppt[8,2]` kPa (CI=`r LMER.table.odi.ppt[8,3]`-`r LMER.table.odi.ppt[8,4]`. P-value=`r LMER.table.odi.ppt[8,5]` ), and the _stiff group_ had an increase of `r LMER.table.odi.ppt[10,2]` kPa (CI=`r LMER.table.odi.ppt[10,3]`-`r LMER.table.odi.ppt[10,4]`. P-value=`r LMER.table.odi.ppt[10,5]` ). The responders had no significant changes in PPT from post-SMT to follow-up. 
+
+For the non-responders an increase in PPT post-SMT was observed only in the _pain group_, and was comparable to the responders (p-value= `r LMER.table.odi.ppt[11,5]`). The _stiff group_ had a minor non-significant PPT decrease of `r -LMER.table.odi.ppt[9,2]` kPa (CI=`r LMER.table.odi.ppt[9,3]`-`r LMER.table.odi.ppt[9,4]`. P-value=`r LMER.table.odi.ppt[9,5]` ) post-SMT. This finding was consistent at follow-up (P-value=`r LMER.table.odi.ppt[19,5]`). 
+
+The difference at follow-up between responders and non-responders in the _stiff group_ was `r LMER.table.odi.ppt[33,2]` kPa (CI=`r LMER.table.odi.ppt[33,3]`-`r LMER.table.odi.ppt[33,4]`. P-value=`r LMER.table.odi.ppt[33,5]`). See Figure `r f.lmer.ppt`.
+
+## Post-SMT changes in heat pain threshold
+
+A small baseline difference was observed in the HPT model between responders in the _pain group_ and non-responders in the _stiff group_ with an estimate of `r -LMER.table.odi.hpt[5,2]` C. 
+
+A HPT decrease was observed for the responders in the _stiff group_ of `r LMER.table.odi.hpt[10,2]` C (CI=`r LMER.table.odi.hpt[10,3]`-`r LMER.table.odi.hpt[10,4]`. P-value=`r LMER.table.odi.hpt[10,5]`), but not in the _pain group_ (P-value=`r LMER.table.odi.hpt[8,5]`) post-SMT. 
+
+There were no difference in HPT post-SMT for the non-responders. However, at follow-up the non-responders in the _stiff group_ had a HPT increase of `r LMER.table.odi.hpt[29,2]` C (CI=`r LMER.table.odi.hpt[29,3]`-`r LMER.table.odi.hpt[29,4]`. P-value=`r LMER.table.odi.hpt[29,5]`) while the responders in the _pain group_ had an overall increase over time which reached statistical significance at follow-up of `r LMER.table.odi.hpt[28,2]` C (CI=`r LMER.table.odi.hpt[28,3]`-`r LMER.table.odi.hpt[28,4]`. P-value=`r LMER.table.odi.hpt[28,5]`). The _pain group_ non-responders did not change their HPT score over time. See Figure `r f.lmer.hpt`.
+
+## Post-SMT changes in global stiffness
+The GS model did not demonstrate any significant group differences at any time point. See Figure `r f.lmer.gs`.
+
+## Segmental analysis
+There was no difference between the treated segment, the adjacent segment(s) and the remaining segments, see Figure `r f.seg`.  
+
+## Cumulative Proportion of Responders Analysis
+
+Figure `r fCPRA` illustrates a CPRA graph for ODI responders at follow-up. The graph demonstrates the chosen ODI cut-point for responder/non-responder at 30% as the green line. The red line illustrates the percent of participants that had 0% ODI difference from baseline to follow-up. The line extends negatively beyond 0, meaning that `r round(CPRA.n %>% filter(ODI.imp=="Worse") %>% select(freq)*100,1)`) of the cohort did not improve at all, but became worse. 
+A post hoc analysis that further dichotomizes the non-responders into _unchanged_ and _worsened_ shows that `r unchanged` were unchanged, and `r worse` participants had an ODI increase at follow-up.  
+
+### Post hoc analysis
+
+Extending the responder categorization from responder/non-responder to responder/unchanged/worse did not explain a more significant portion of the variances, thus this trichotomization did not add further value to changes in the experimental outcomes using one-way anova testing see table `r tanova`. Furthermore, these new results were plotted and did not change the results observed in the original dichotomization [additional file 1]. 
+
+## Sensitivity analysis 
+
+When using self-reported low back pain intensity as the outcome measure as opposed to ODI scores, and setting the responder/non-responder cut point to 30% improvement in pain intensity, a decrease in responders was observed (`r resp.total.nrs` vs `r resp.total`). For HPT and GS choosing NRS over ODI did not change the outcome measures. However, the difference observed in PPT from the responders to the non-responders in the _stiff group_ disappeared. Post-SMT the group-difference from baseline was `r LMER.table.nrs.ppt[13,2]` kPa and for follow-up only `r LMER.table.nrs.ppt[33,2]` kPa.  
+
+# Discussion
+## Brief summary of results
+In the present study only `r round(resp.total/(resp.total+nonresp.total)*100,1)`% of participants were classified as responders. A significant increase in PPT was observed in the pain group irrespective of responder status. Conversely, in the stiff group an increase in PPT was observed only in the responder subgroup. No clear pattern was observed for HPT across groups and responder status. No difference in GS was noted between groups or within groups over time. The changes observed were constant between all segmental levels. 
+
+## Responder vs non-responder
+
+Participants in the present study were recruited from a select subgroup of LBP patients, specifically patients referred for assessment in a hospital setting. One of the criteria for such referral in Denmark is insufficient effect of conservative management in the primary care setting. In other words, we must assume that LBP patients who respond favorably to SMT are underrepresented in this cohort compared to LBP patients in general (@rubinstein_benefits_2019). The fact that `r round(worse/123*100,1)`% of the participants experienced a loss of disability after the intervention supports this statement. 
+
+Previous studies have demonstrated that patient expectations [@eklund_expectations_2019; @verbeek_patient_2004] are predictive of conservative treatment response, but this was not found to be the case in the present data. Further suggesting that the cohort may not be directly comparable to similar studies conducted on primary care patients or volunteers. However, consistent with the literaute [@wertli_role_2014; @wertli_catastrophizingprognostic_2014; @lochting_impact_2017] the psychological traits were associated with being a non-responder. 
+
+## Theoretical basis for an effect of spinal manipulative therapy
+
+Historically, the underpinnings of SMT has been a biomechanical effect on joint function and/or a physiological effect on nerve function [@triano_biomechanics_2001]. Spinal manipulative therapy had no impact on mechanical stiffness but did have a segmental effect on mechanical pressure threshold. Interestingly, this effect was observed in two situations: i) when SMT was applied to at the most pain sensitive segment irrespective of responder status, and ii) in the responder group irrespective of where SMT was applied. 
+
+Several literature reviews indicate that SMT has a non-specific effect on pain sensitivity [@honore_regional_2018; @millan_effect_2012; @aspinall_manipulation-induced_2019; @coronado_changes_2012]. Such an effect explains the increase in PPT observed in the pain group across responder status as described above (i). However, no such effect was observed in the stiff group. This indicates that the analgesic effect may be greater when directed at pain sensitive segments. 
+
+A large body of research indicates that pain sensitivity increases in step with clinical pain chronicity [@oneill_generalized_2007; @oneill_low_2011;@marcuzzi_acute_2018; @staud_mechanical_2012]. There is also research which demonstrates that improvement of clinical pain intensity is followed by a decrease in experimental pain sensitivity [@verne_reversal_2003; @staud_enhanced_2009]. Our finding of increased PPT in the responder group independent of treatment allocation (ii), could be explained by such mechanisms, i.e. decreased experimental pain sensitivity following successful clinical intervention (SMT).
+
+Thus, mechanical hypoalgesia in the present study could be explained as either a direct neurophysiological effect of SMT on hyperalgesic segments or an indirect effect through successful treatment of a painful condition (Figure `r f.smt`).
+
+However, the current analysis does not allow us to determine whether a neurophysiological effect on pain sensitivity was a purely local phenomenon or a centrally mediated response to SMT [@meyer_unravelling_2019]. 
+
+## Is it biomechanics?
+
+In recent decades, a range of QST procedures with well-delineated methodology (stimulus type, intensity, rate of application, quantification method etc.) has been used to publish data on pain sensitivity [@graven-nielsen_assessment_2010]. No such range of tests of segmental biomechanical function has gained widespread acceptance [@wong_clinical_2017], and it remains unclear which aspects of biomechanical function are clinically relevant.
+
+Although, the VT provides measures of biomechanical function which are both standardized and objective, it is unknown to what extent these are clinically meaningful or correlate to clinical procedures such as manual palpation [@kawchuk_clinicians_2019]. It is entirely possible that other measures of segmental biomechanical function are more relevant than the VT. 
+
+Conversely, several studies report a correlation between different experimental pain measures, including PPT [@neziri_factor_2011; @duffy_quantitative_2017; @hastie_cluster_2005; @neddermeyer_principle_2008]. It should be noted that where as PPT is a measure of deep mechanical pain sensitivity, HPT quantifies superficial (skin) pain sensitivity. If one assumes that LBP originates in the deep spinal tissues [@hancock_systematic_2007] it is perhaps not surprising that no clear effect on superficial pain sensitivity was observed in contrast to deep PPT.  
+
+This analysis further found that the changes observed were consistent irrespective of the SMT application site. This is in contrast with the literature, specifically when SMT is applied in a highly controlled condition in animal models. Examining SMT in this fashion shows that the mechanistic outcomes are dependent on both the segmental application and the localized thrust on that segment [@reed_neural_2015; @edgecombe_effect_2015]. To our knowledge this is the first study that looks at segmental changes for the chosen outcomes and could possible not be related to the specific examination only possible to achieve in animal research.  
+
+## Methodological considerations
+
+We consider the most likely explanation of the findings of the sensitivity analysis to be a difference in responsiveness between ODI and subjective LBP. The numerical rating scale is restricted to scores between 0 and 10 whereas ODI spans a range of 0 to 50.  The smaller resolution of the 11-item subjective back pain scale limits the responsiveness of the scale, which in this context translates into a smaller number of responders. Further, there is a possibility that loss of pain and improvement in disability does not correlate entirely [@okeeffe_cognitive_2019]. 
+
+As stated in RCT paper [REF RCT], this was not a placebo-controlled study meaning that the clinical improvement observed could be due to something other than the SMT treatment. This, however, does not challenge the view that the PPT increase was seen as a segment specific SMT and a non-specific effect mediated by clinical improvement. 
+
+There are also strengths to consider: this was a fairly large cohort of persistent LBP patients seen in the secondary care sector. We measured multiple experimental measures both immediately following SMT and at 14-days follow-up and had the possibility to correlate this with clinical improvements.
+
+# Conclusion
+SMT has a segment specific neurological reflex on PPT, which further is mediated by an improvement in disability. No clear change was observed in HPT, leaving this variable suspect to be dependent of a SMT response. There was no changes in GS independent of allocation and responder status. SMT appears to have both a segmental and general effect on regional mechanical pain sensitivity, but not on biomechanics. However, the changes were not associated with the application site of SMT. 
+
+# Legends
+
+## Tables
+
+### Table 1
+
+Legend: -
+
+### Table 2
+
+Legend: -
+
+### Table 3
+
+Legend: -
+
+## Figures
+
+### Figure 1
+
+Legend: -
+
+### Figure 2
+
+Legend: -
+
+### Figure 3
+
+Legend: -
+
+### Figure 4
+
+Legend: -
+
+### Figure 5
+
+Legend: -
+
+### Figure 6
+
+Legend: -
+
+
+# Main figures
+## Figure 1
+```{r}
+PPTR.figure
+```
+
+## Figure 2
+```{r}
+hptR.figure
+```
+
+## Figure 3
+```{r}
+gsR.figure
+```
+
+## Figure 4
+```{r}
+grid_arrange_shared_legend(f.seg.ppt,f.seg.hpt,f.seg.gs)
+```
+
+
+## Figure 5
+```{r}
+CPRA 
+```
+
+## Figure 6
+```{r}
+smtfig # still neds some work, forinstance black edges
+```
+
+
+# Main tables
+
+## Table 1
+```{r}
+table.prom.res %>% pander()
+```
+
+## Table 2
+```{r}
+EM.base %>% pander()
+```
+
+
+## Table 3
+```{r}
+table.anova %>% pander()
+```
+
+# References
